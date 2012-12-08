@@ -1,96 +1,122 @@
 <?php
-include('simple_html_dom.php');
+include('phpQuery.php');
 
-$url='Hacker News.htm';
-$html=file_get_html($url);
-$res=$html->find('table table td[class=title]');
-$comm=$html->find('table table td[class=subtext]');
-$i=0;
+$url='http://news.ycombinator.com/';
+$html=curl_file_get_contents($url);
+
+$url='http://www.reddit.com/r/programming';
+$html2=curl_file_get_contents($url);
+
+$url='http://www.reddit.com/r/programmingchallenges';
+$html3=curl_file_get_contents($url);
+
+$dom=phpQuery::newDocument($html);
+$titleLink=$dom['table table td.title:has(a)'];
+$info=$dom['table table td.subtext'];
+
 echo '<div id="geek"><div id="HN"><div class="caption">Hacker News</div><br/>';
-foreach($res as $e){
-    if($e->find('a') && $e->children(0)->plaintext!='More'){
-        echo '<div class="entry"><div class="pre">';
-        $p=$comm[$i]->find('span');
-        if($p){
-            $point=explode(' ',$comm[$i]->children(0)->plaintext,2);
-            $point=$point[0];        
-            echo '<span class="point">'.$point.'</span>';
-        }
-        else
-            echo '<span class="point">•</span>';
 
-        echo '</div><div class="content">';
-        $a=$comm[$i]->find('a',1);
-        $e->children(0)->class='title';
-        if($a){
-            $val='http://news.ycombinator.com/'.$a->href;
-            $a->href=$val;
-            $a->class='comments';
-            echo $e->innertext.'<br/>';            
-            echo $a->outertext;
-        }
-        else{
-            $val=$e->children(0)->href;
-            if(substr($val,0,4)!='http')
-                $e->children(0)->href='http://news.ycombinator.com/'.$val;
-            echo $e->innertext;
-        }
-        echo '</div></div>';
-        ++$i;
-    }
+$points=array();
+$comments=array();
+$i=0;
+foreach($info as $e){
+	$tp=pq($e);
+	if($tp->is(':has(span))')){
+		$tp=$tp['span'];
+		$tp=explode(' ',$tp->html(),2);
+		$tp=$tp[0];
+	}
+	else{
+		$tp='•';
+	}
+	$points[$i]=$tp;
+	$tp=pq($e);
+	if(count($tp['a'])==2){
+		$tp=pq($tp['a:nth-child(3)']);
+		$tp->addClass('comments');
+	}
+	else
+		$tp='';
+	$comments[$i++]=$tp;
 }
-$html->clear();
+$i=0;
+foreach($titleLink as $e){
+	$e=pq($e);
+	if($e['a:last-child']->html()!="More"){
+		echo '<div class="entry"><div class="pre">';
+		echo '<span class="point">'.$points[$i].'</span>'; //points
+		echo '</div><div class="content">';
+		pq($e['a'])->addClass('title');
+		echo $e->html().'<br/>';	//title $ domain
+		if($comments[$i]!=''){
+			echo $comments[$i];		//comments 
+		}
+		echo '</div></div>';
+		++$i;
+	}
+}
 echo '</div><hr><br/><div id="RPro"><div class="caption">Reddit Programming</div><br/>';
 
-$url2='programming.htm';
-$html2=file_get_html($url2);
-$res2=$html2->find('div[class^=entry]');
-$points=$html2->find('div[class=score unvoted]');
-$j=0;
-foreach($res2 as $e){
-    echo '<div class="entry"><div class="pre">';
-    echo '<span class="point">'.$points[$j++]->plaintext.'</span>';
-    echo '</div><div class="content">';
-    echo $e->children(0)->children(0)->outertext.'&nbsp;';
-    echo $e->children(0)->children(1)->outertext.'<br/>';
-    $comm=$e->find('a[class^=comments]',0);
-    if($comm){
-        $strs=explode(' ',$comm->plaintext,2);
-        if(intval($strs[0][0])==0)
-            $comm->plaintext='discuss';
-        else    
-            $comm->plaintext=$strs[0].' comments';
-        echo '<a class="comments" href="'.$comm->href.'" >'.$comm->plaintext."</a>";
-    }
-    echo '</div></div>';
+$dom=phpQuery::newDocument($html2);
+$entry=$dom['div.entry'];
+$pointDom=$dom['div.score.unvoted'];
+
+$points=array();
+$i=0;
+foreach($pointDom as $e){
+	$points[$i++]=pq($e)->html();
+}
+$i=0;
+foreach($entry as $e){
+	echo '<div class="entry"><div class="pre">';
+	echo '<span class="point">'.$points[$i++].'</span>'; //points
+	echo '</div><div class="content">';
+	$e=pq($e);
+	echo $e['p a.title:first-child'].'&nbsp;'.$e['p span.domain'].'<br/>'; //title & domain
+	if($e->is(':has("a.comments")')){
+		$comment=pq($e['a.comments']);
+		$comment->addClass('comments');
+		$strs=explode(' ',$comment->html(),2);
+		if(intval($strs[0][0])==0)
+			$comment->html('discuss');
+		else    
+			$comment->html($strs[0].' comments');
+		echo $comment;	//comments
+	}
+	echo '</div></div>';
 }
 
 echo '</div><hr><br/><div id="RCha"><div class="caption">Reddit Challenge</div><br/>';
 
-$url2='pc.htm';
-$html2=file_get_html($url2);
-$res2=$html2->find('div[class^=entry]');
-$points=$html2->find('div[class=score unvoted]');
-$j=0;
-foreach($res2 as $e){
-    echo '<div class="entry"><div class="pre">';
-    echo '<span class="point">'.$points[$j++]->plaintext.'</span>';
-    echo '</div><div class="content">';
-    echo $e->children(0)->children(0)->outertext.'&nbsp;';
-    echo $e->children(0)->children(1)->outertext.'<br/>';
-    $comm=$e->find('a[class^=comments]',0);
-    if($comm){
-        $strs=explode(' ',$comm->plaintext,2);
-        if(intval($strs[0][0])==0)
-            $comm->plaintext='discuss';
-        else    
-            $comm->plaintext=$strs[0].' comments';
-        echo '<a class="comments" href="'.$comm->href.'" >'.$comm->plaintext."</a>";
-    }
-    echo '</div></div>';
+$dom=phpQuery::newDocument($html3);
+$entry=$dom['div.entry'];
+$pointDom=$dom['div.score.unvoted'];
+
+$points=array();
+$i=0;
+foreach($pointDom as $e){
+	$points[$i++]=pq($e)->html();
+}
+$i=0;
+foreach($entry as $e){
+	echo '<div class="entry"><div class="pre">';
+	echo '<span class="point">'.$points[$i++].'</span>'; //points
+	echo '</div><div class="content">';
+	$e=pq($e);
+	echo $e['p a.title:first-child'].'&nbsp;'.$e['p span.domain'].'<br/>';
+	if($e->is(':has("a.comments")')){
+		$comment=pq($e['a.comments']);
+		$comment->addClass('comments');
+		$strs=explode(' ',$comment->html(),2);
+		if(intval($strs[0][0])==0)
+			$comment->html('discuss');
+		else    
+			$comment->html($strs[0].' comments');
+		echo $comment;
+	}
+	echo '</div></div>';
 }
 
 echo '</div></div>';
-$html2->clear();
+//$html3->clear();
 ?>
-

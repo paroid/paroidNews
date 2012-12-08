@@ -29,7 +29,7 @@
                 <?php include('geek.php'); ?>
             </div>
         </div>
-		<div id="top"><a href="javascript:toTop()" title="Back to Top"></a></div>
+		<div id="top"><a href="javascript:toTop()"></a></div>
         <div id="footer">
             <span>Copyright: <a href="http://paroid.org">paroid</a> 2010-2012</span>
         </div>
