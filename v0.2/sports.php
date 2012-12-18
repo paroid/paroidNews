@@ -3,8 +3,6 @@ include('phpQuery.php');
 $url='http://www.zhibo8.cc/';
 $html=curl_file_get_contents($url);
 $dom=phpQuery::newDocument($html);
-/*$top=$html->find('div[id=top10] div[class=box]');
-$res=$html->find('div[id=left] div[class=box]');*/
 $footballVideo=$dom['div#top10 div.box:first-child'];
 $basketballVideo=$dom['div#top10 div.box:last-child'];
 $lives=$dom['div#left div.box'];
@@ -17,9 +15,6 @@ echo '</div><hr><div id="live"><h2 class="title">直播表</h2>';
 foreach($lives as $e){
 	$e=pq($e);
 	if($e['.content']->is(':has("li b")')){
-    //$list=$e->children(1)->children(0)->find('li');
-	//if($list==null || $e->children(1)->children(0)->find('b')==null)
-		//continue;
 	echo '<div class="day"><hr>'.$e['.titlebar h2'].'<hr>';
 	$i=0;
 	$list=$e['ul li:has(b)'];
