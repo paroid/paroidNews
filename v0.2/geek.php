@@ -118,5 +118,4 @@ foreach($entry as $e){
 }
 
 echo '</div></div>';
-//$html3->clear();
 ?>
