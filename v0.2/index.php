@@ -15,21 +15,20 @@
             <h1>paroid News - Geek News from the Web</h1>
             <ul class="nav">
                 <li class="home"><a href="http://paroid.org"><img src="/favicon.ico" alt="paroid.org" /></a></li>
-            	<li><a href="javascript:loadGeek()">Geek</a></li>
+            	<li><a href="javascript:showGeek()">Geek</a></li>
                 <li class="sep">|</li>
-            	<li><a href="javascript:loadSO()">Questions</a></li>
+            	<li><a href="javascript:showSO()">Questions</a></li>
                 <li class="sep">|</li>
-            	<li><a href="javascript:loadSports()">Sports</a></li>
+            	<li><a href="javascript:showSports()">Sports</a></li>
             	<li></li>
             </ul>
         </div>
         <img id="loading" src="32.gif" alt=" "/>
         <div id="main">
             <div id="news">
-                <?php include('geek.php'); ?>
             </div>
         </div>
-		<div id="top"><a href="javascript:toTop()" title="Back to Top"></a></div>
+		<div id="top"><a href="javascript:toTop()"></a></div>
         <div id="footer">
             <span>Copyright: <a href="http://paroid.org">paroid</a> 2010-2012</span>
         </div>
