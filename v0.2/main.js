@@ -177,7 +177,7 @@ function setTip () {
 
 
 jQuery(document).ready(function($){
-	$('#top a').attr('tip','Back to Top').tipTip({defaultPosition:'top',delay:200});
+	$('#top a').tipTip({content:'Back to Top',defaultPosition:'top',delay:200});
 	showGeek();
 	loadSO();
 	loadSports();
