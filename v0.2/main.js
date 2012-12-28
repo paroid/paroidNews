@@ -11,7 +11,7 @@ var sor=false;
 
 function loadGeek(callback){
 	$('#tmp').load('geek.php',function(){
-		$('#HN a,#RPro a,RCha a').attr({target:'_blank'});
+		$('#HN a,#RPro a,#RCha a').attr({target:'_blank'});
 		$('#HN a').attr('href',function(){
 			var link=$(this).attr('href');
 			if(link.substr(0,4)!='http')
