@@ -3,119 +3,143 @@ include('phpQuery.php');
 
 $url='http://news.ycombinator.com/';
 $html=curl_file_get_contents($url);
+$hackerNewsDiv = hackerNewsFormater($html);
 
 $url='http://www.reddit.com/r/programming';
-$html2=curl_file_get_contents($url);
+$html=curl_file_get_contents($url);
+$redditProgrammingDiv = redditFormatter($html);
 
 $url='http://www.reddit.com/r/programmingchallenges';
-$html3=curl_file_get_contents($url);
+$html=curl_file_get_contents($url);
+$redditTechnologyDiv = redditFormatter($html);
 
-$dom=phpQuery::newDocument($html);
-$titleLink=$dom['table table td.title:has(a)'];
-$info=$dom['table table td.subtext'];
+$geekDivHeader = '<div id="geek">';
+$footer = '</div>';
+$hackerNewsHeader = '<div id="HN"><div class="caption">Hacker News</div><br/>';
+$hackerNewsFooter = '</div>';
+$separater = '<hr><br/>';
+$redditProgramHeader = '<div id="RPro"><div class="caption">Reddit Programming</div><br/>';
+$redditTechHeader = '<div id="RCha"><div class="caption">Reddit Challenge</div><br/>';
 
-echo '<div id="geek"><div id="HN"><div class="caption">Hacker News</div><br/>';
+echo $geekDivHeader;
 
-$points=array();
-$comments=array();
-$i=0;
-foreach($info as $e){
-	$tp=pq($e);
-	if($tp->is(':has(span))')){
-		$tp=$tp['span'];
-		$tp=explode(' ',$tp->html(),2);
-		$tp=$tp[0];
-	}
-	else{
-		$tp='•';
-	}
-	$points[$i]=$tp;
-	$tp=pq($e);
-	if(count($tp['a'])==2){
-		$tp=pq($tp['a:nth-child(3)']);
-		$tp->addClass('comments');
-	}
-	else
-		$tp='';
-	$comments[$i++]=$tp;
-}
-$i=0;
-foreach($titleLink as $e){
-	$e=pq($e);
-	if($e['a:last-child']->html()!="More"){
-		echo '<div class="entry"><div class="pre">';
-		echo '<span class="point">'.$points[$i].'</span>'; //points
-		echo '</div><div class="content">';
-		pq($e['a'])->addClass('title');
-		echo $e->html().'<br/>';	//title $ domain
-		if($comments[$i]!=''){
-			echo $comments[$i];		//comments 
-		}
-		echo '</div></div>';
+echo $hackerNewsHeader;
+echo $hackerNewsDiv;
+echo $footer.$separater;
+
+echo $redditProgramHeader;
+echo $redditProgrammingDiv;
+echo $footer.$separater;
+
+echo $redditTechHeader;
+echo $redditTechnologyDiv;
+echo $footer.$footer;
+
+function hackerNewsFormater($htmlStr){
+	$dom=phpQuery::newDocument($htmlStr);
+	$titleVec=$dom['table table td.title:has(a)'];
+	$infoVec=$dom['table table td.subtext'];
+	//parse Title
+	$titles = parseHackerNewsTitle($titleVec);
+	//parse Info
+	parseHackerNewsInfo($infoVec,$points,$comments);
+
+	$result='';
+	$i=0;
+	foreach($titles as $e){
+		$result .= '<div class="entry"><div class="pre">';
+		$result .= '<span class="point">'.$points[$i].'</span>'; //points
+		$result .= '</div><div class="content">';
+		$result .= $titles[$i].'<br/>';	//title $ domain
+		$result .= $comments[$i];		//comments 			
+		$result .= '</div></div>';
 		++$i;
 	}
+	return $result;
 }
-echo '</div><hr><br/><div id="RPro"><div class="caption">Reddit Programming</div><br/>';
 
-$dom=phpQuery::newDocument($html2);
-$entry=$dom['div.entry'];
-$pointDom=$dom['div.score.unvoted'];
-
-$points=array();
-$i=0;
-foreach($pointDom as $e){
-	$points[$i++]=pq($e)->html();
-}
-$i=0;
-foreach($entry as $e){
-	echo '<div class="entry"><div class="pre">';
-	echo '<span class="point">'.$points[$i++].'</span>'; //points
-	echo '</div><div class="content">';
-	$e=pq($e);
-	echo $e['p a.title:first-child'].'&nbsp;'.$e['p span.domain'].'<br/>'; //title & domain
-	if($e->is(':has("a.comments")')){
-		$comment=pq($e['a.comments']);
-		$comment->addClass('comments');
-		$strs=explode(' ',$comment->html(),2);
-		if(intval($strs[0][0])==0)
-			$comment->html('discuss');
-		else    
-			$comment->html($strs[0].' comments');
-		echo $comment;	//comments
+function parseHackerNewsTitle($titleVec){
+	$i=0;
+	foreach($titleVec as $e){
+		$e=pq($e);
+		if($e['a:last-child']->html()!="More"){ // no More
+			pq($e['a'])->addClass('title');
+			$titles[$i++]=$e->html();	//title $ domain
+		}
 	}
-	echo '</div></div>';
+	return $titles;
 }
 
-echo '</div><hr><br/><div id="RCha"><div class="caption">Reddit Challenge</div><br/>';
-
-$dom=phpQuery::newDocument($html3);
-$entry=$dom['div.entry'];
-$pointDom=$dom['div.score.unvoted'];
-
-$points=array();
-$i=0;
-foreach($pointDom as $e){
-	$points[$i++]=pq($e)->html();
-}
-$i=0;
-foreach($entry as $e){
-	echo '<div class="entry"><div class="pre">';
-	echo '<span class="point">'.$points[$i++].'</span>'; //points
-	echo '</div><div class="content">';
-	$e=pq($e);
-	echo $e['p a.title:first-child'].'&nbsp;'.$e['p span.domain'].'<br/>';
-	if($e->is(':has("a.comments")')){
-		$comment=pq($e['a.comments']);
-		$comment->addClass('comments');
-		$strs=explode(' ',$comment->html(),2);
-		if(intval($strs[0][0])==0)
-			$comment->html('discuss');
-		else    
-			$comment->html($strs[0].' comments');
-		echo $comment;
+function parseHackerNewsInfo($infoVec,&$points,&$comments){
+	$i=0;
+	foreach($infoVec as $e){
+		$points[$i]=parseHackerNewsPoint(pq($e));
+		$comments[$i++]=parseHackerNewsComment(pq($e));
 	}
-	echo '</div></div>';
+}
+function parseHackerNewsPoint($item){
+	if($item->is(':has(span))')){ //has point
+		$item=$item['span'];
+		$item=explode(' ',$item->html(),2);
+		return $item[0];
+	}
+	else//no point
+		return '•';
+}
+function parseHackerNewsComment($item){
+	if(count($item['a'])==2){	//has comment
+		$item=pq($item['a:nth-child(3)']);
+		$item->addClass('comments');
+		return $item;
+	}
+	else//no comment
+		return '';
 }
 
-echo '</div></div>';
+
+function redditFormatter($htmlStr){
+	$dom=phpQuery::newDocument($htmlStr);
+	$entryVec=$dom['div.entry'];
+	$pointVec=$dom['div.score.unvoted'];
+	//parse points
+	parseRedditPoint($pointVec,$points);
+	$i=0;
+	$result = '';
+	foreach($entryVec as $e){
+		parseRedditInfo($e,$title,$domain,$comment);
+
+		$result .= '<div class="entry"><div class="pre">';
+		$result .= '<span class="point">'.$points[$i++].'</span>'; //points
+		$result .= '</div><div class="content">';
+		$result .=$title.'&nbsp;'.$domain.'<br/>'; //title & domain
+		$result .= $comment;	//comments
+		$result .= '</div></div>';
+	}
+	return $result;
+}
+
+function parseRedditPoint($pointVec,&$points){
+	$i=0;
+	foreach($pointVec as $e){
+		$points[$i++]=pq($e)->html();
+	}
+}
+
+function parseRedditInfo($item,&$title,&$domain,&$comment){
+		$e=pq($item);
+		$title = $e['p a.title:first-child'];
+		$domain = $e['p span.domain'];
+		$comment = '';
+
+		if($e->is(':has("a.comments")')){ // has comment
+			$comment=pq($e['a.comments']);
+			$comment->addClass('comments');
+			$strs=explode(' ',$comment->html(),2);//get comment num
+			if(intval($strs[0][0])==0)// 0 comment
+				$comment->html('discuss');
+			else    
+				$comment->html($strs[0].' comments');
+		}
+}
+
 ?>
