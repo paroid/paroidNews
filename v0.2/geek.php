@@ -9,7 +9,7 @@ $url='http://www.reddit.com/r/programming';
 $html=curl_file_get_contents($url);
 $redditProgrammingDiv = redditFormatter($html);
 
-$url='http://www.reddit.com/r/programmingchallenges';
+$url='http://www.reddit.com/r/technology';
 $html=curl_file_get_contents($url);
 $redditTechnologyDiv = redditFormatter($html);
 
@@ -19,7 +19,7 @@ $hackerNewsHeader = '<div id="HN"><div class="caption">Hacker News</div><br/>';
 $hackerNewsFooter = '</div>';
 $separater = '<hr><br/>';
 $redditProgramHeader = '<div id="RPro"><div class="caption">Reddit Programming</div><br/>';
-$redditTechHeader = '<div id="RCha"><div class="caption">Reddit Challenge</div><br/>';
+$redditTechHeader = '<div id="RCha"><div class="caption">Reddit Technology</div><br/>';
 
 echo $geekDivHeader;
 
