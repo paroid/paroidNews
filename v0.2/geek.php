@@ -1,7 +1,7 @@
 <?php
 include('phpQuery.php');
 
-$url='http://news.ycombinator.com/';
+$url='https://news.ycombinator.com/';
 $html=curl_file_get_contents($url);
 $hackerNewsDiv = hackerNewsFormater($html);
 
