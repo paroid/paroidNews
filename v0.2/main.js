@@ -56,7 +56,7 @@ function addHttpPrefix(selector,prefix){
 }
 
 function geekProcess(){
-	addHttpPrefix('#HN a','http://news.ycombinator.com/');
+	addHttpPrefix('#HN a','https://news.ycombinator.com/');
 	addHttpPrefix('RPro a,#RCha a','http://www.reddit.com');
 }
 
