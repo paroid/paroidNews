@@ -16,8 +16,8 @@ class liveOfDay{
 
 function sportsNewsFormater($htmlStr){
 	$dom=phpQuery::newDocument($htmlStr);
-	$footballVideo=$dom['div#top10 div.box:first-child div.video'];
-	$basketballVideo=$dom['div#top10 div.box:last-child div.video'];
+	$footballVideo=$dom['div#top10 div.box:first-child div.video span'];
+	$basketballVideo=$dom['div#top10 div.box:last-child div.video span'];
 	$liveVec=$dom['div#left div.box'];
 
 	$days = parseLive($liveVec);
