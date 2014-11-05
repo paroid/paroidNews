@@ -127,7 +127,7 @@ function parseRedditPoint($pointVec,&$points){
 
 function parseRedditInfo($item,&$title,&$domain,&$comment){
 		$e=pq($item);
-		$title = $e['p a.title:first-child'];
+		$title = $e['p a.title'];
 		$domain = $e['p span.domain'];
 		$comment = '';
 
